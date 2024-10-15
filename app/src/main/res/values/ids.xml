@@ -1,0 +1,5 @@
+<resources>
+    <item name="Rdodog" type="id" />
+    <item name="Rdocat" type="id" />
+    <item name="Rdorabbit" type="id" />
+</resources>
