@@ -1,8 +1,10 @@
 package com.example.app;
 
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -14,7 +16,15 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.Manifest;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+import java.io.File;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
     TextView text1, text2;
@@ -28,6 +38,25 @@ public class MainActivity extends AppCompatActivity {
     float scale = 1.0f; // 확대/축소 비율
     float angle = 0f; // 회전 각도
     float brightness = 1.0f; // 기본 밝기 값 (1.0은 원래 밝기)
+
+    String imagePath = "/storage/emulated/0/Download/dog.png";
+
+    private void loadImageFromDisk(String imgPath) {
+        Log.d("ImageLoad", "Loading image: " + imgPath); // 이미지 로드 경로 로그 출력
+        File imgFile = new File(imgPath); // imgPath 경로로 파일 객체 생성
+        if (imgFile.exists()) {
+            Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath()); // 파일 경로에서 이미지 로드
+            if (bitmap != null) {
+                imgPet.setImageBitmap(bitmap); // 이미지를 ImageView에 설정
+                Log.d("ImageLoad", "Image loaded successfully"); // 이미지가 성공적으로 로드된 경우
+            } else {
+                Log.d("ImageLoad", "Failed to decode image"); // 이미지 디코드 실패
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "이미지 파일을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+            Log.d("ImageLoad", "Image file does not exist"); // 이미지 파일이 존재하지 않는 경우
+        }
+    }
 
 
     @SuppressLint("MissingInflatedId")
@@ -80,17 +109,21 @@ public class MainActivity extends AppCompatActivity {
                 int checkedRadioButtonId = rGroup1.getCheckedRadioButtonId();
 
                 if (checkedRadioButtonId == R.id.Rdodog) {
-                    imgPet.setImageResource(R.drawable.dog);
+                    loadImageFromDisk("/storage/emulated/0/Download/dog.png");
                     ImgOptBox.setVisibility(View.VISIBLE);
                 } else if (checkedRadioButtonId == R.id.Rdocat) {
-                    imgPet.setImageResource(R.drawable.cat);
+                    loadImageFromDisk("/storage/emulated/0/Download/cat.png");
                     ImgOptBox.setVisibility(View.VISIBLE);
                 } else if (checkedRadioButtonId == R.id.Rdorabbit) {
+                    loadImageFromDisk("/storage/emulated/0/Download/rabbit.png");
                     imgPet.setImageResource(R.drawable.rabbit);
                     ImgOptBox.setVisibility(View.VISIBLE);
                 } else {
                     Toast.makeText(getApplicationContext(), "동물 먼저 선택하세요", Toast.LENGTH_SHORT).show();
                 }
+
+//                onRequestPermissionsResult(100, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, new int[]{PackageManager.PERMISSION_GRANTED});
+
             }
         });
 
@@ -140,4 +173,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 권한이 허용된 경우 이미지 로드 시도
+                loadImageFromDisk(imagePath);
+            } else {
+                Toast.makeText(this, "권한이 거부되었습니다.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 }
